@@ -8,6 +8,29 @@ from datasets import Version
 CSV_URL = "https://huggingface.co/datasets/JonusNattapong/xauusd-dataset/resolve/main/XAUUSD_enhanced_ml_dataset_clean.csv"
 
 
+def load_xauusd_dataset() -> pd.DataFrame:
+    """
+    Load the XAUUSD dataset directly from Hugging Face.
+
+    Returns:
+        pd.DataFrame: The loaded dataset
+    """
+    try:
+        # Load directly from CSV URL
+        df = pd.read_csv(CSV_URL)
+        print(f"✓ Loaded dataset: {df.shape[0]:,} rows × {df.shape[1]} columns")
+        return df
+    except Exception as e:
+        print(f"✗ Failed to load dataset: {e}")
+        # Fallback: try to load from local file if available
+        local_path = "XAUUSD_enhanced_ml_dataset_clean.csv"
+        if os.path.exists(local_path):
+            df = pd.read_csv(local_path)
+            print(f"✓ Loaded local dataset: {df.shape[0]:,} rows × {df.shape[1]} columns")
+            return df
+        raise e
+
+
 class XAUUSDDataset(GeneratorBasedBuilder):
     """XAUUSD dataset loader that reads the CSV and yields examples.
 
