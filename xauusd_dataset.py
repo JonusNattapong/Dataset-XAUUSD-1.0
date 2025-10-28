@@ -45,11 +45,12 @@ class XAUUSDDataset(GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager):
-        # We directly use the CSV URL; dl_manager can download it if needed
+        # Specify only the enhanced ML dataset CSV to avoid schema mismatches with other files
+        csv_url = "https://huggingface.co/datasets/JonusNattapong/xauusd-dataset/resolve/main/XAUUSD_enhanced_ml_dataset_clean.csv"
         return [
             SplitGenerator(
                 name=Split.TRAIN,
-                gen_kwargs={"filepath": CSV_URL},
+                gen_kwargs={"filepath": csv_url},
             )
         ]
 

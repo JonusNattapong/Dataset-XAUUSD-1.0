@@ -413,13 +413,14 @@ print(f"Features: {len(df.columns)}")
 ```
 
 ### Load with Hugging Face Datasets:
+**Note**: Due to multiple CSV files with different schemas in this repository, the HF datasets library may encounter compatibility issues. Direct CSV loading (above) is recommended for best results.
+
+If you prefer to use the datasets library, you can load the CSV directly:
 ```python
 from datasets import load_dataset
 
-# Load the dataset
-dataset = load_dataset("JonusNattapong/xauusd-dataset")
-
-# Access the data
+# Load the specific CSV file
+dataset = load_dataset('csv', data_files="https://huggingface.co/datasets/JonusNattapong/xauusd-dataset/resolve/main/XAUUSD_enhanced_ml_dataset_clean.csv")
 print(dataset['train'].column_names)
 print(dataset['train'][0])
 ```
@@ -435,9 +436,9 @@ from sklearn.metrics import accuracy_score
 df = pd.read_csv("https://huggingface.co/datasets/JonusNattapong/xauusd-dataset/resolve/main/XAUUSD_enhanced_ml_dataset_clean.csv")
 
 # Prepare features and target
-feature_cols = [col for col in df.columns if col not in ['Date', 'Target_Binary']]
+feature_cols = [col for col in df.columns if col not in ['Date', 'Target_1d', 'Target_5d']]
 X = df[feature_cols]
-y = df['Target_Binary']
+y = df['Target_1d']
 
 # Split data (time series aware)
 split_idx = int(len(df) * 0.8)
