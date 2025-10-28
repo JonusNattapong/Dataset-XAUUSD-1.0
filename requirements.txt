@@ -1,0 +1,9 @@
+yfinance==0.2.40
+pandas==2.2.2
+matplotlib==3.9.2
+seaborn==0.13.2
+numpy==1.26.4
+ta==0.11.0
+requests==2.32.3
+beautifulsoup4==4.12.3
+textblob==0.18.0
