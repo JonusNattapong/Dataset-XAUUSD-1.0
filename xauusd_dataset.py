@@ -54,22 +54,31 @@ class XAUUSDDataset(GeneratorBasedBuilder):
         ]
 
     def _generate_examples(self, filepath: str) -> Iterator:
-        # Use pandas iterator to avoid loading whole file into memory
-        for idx, row in pd.read_csv(filepath, chunksize=1000):
-            # rows from chunksize iterator come as DataFrame; iterate rows
-            for i, r in row.iterrows():
+        # Use pandas chunked iterator to avoid loading the whole file into memory
+        for chunk_idx, chunk in enumerate(pd.read_csv(filepath, chunksize=1000)):
+            for row_idx, row in chunk.iterrows():
                 example = {}
-                for col in row.columns:
-                    val = r[col]
+                for col in chunk.columns:
+                    val = row[col]
                     if pd.isna(val):
                         example[col] = None
                     else:
-                        # Cast numpy types to native Python types where possible
-                        if hasattr(val, "item"):
-                            try:
-                                example[col] = val.item()
-                            except Exception:
-                                example[col] = val
-                        else:
-                            example[col] = val
-                yield f"{idx}-{i}", example
+                        # Convert numpy scalars to native Python scalars to avoid
+                        # pickling / numpy dtype issues when the dataset is
+                        # serialized by the HF datasets library.
+                        try:
+                            # pandas/numpy scalar -> python native
+                            if hasattr(val, "item"):
+                                cast_val = val.item()
+                            else:
+                                cast_val = val
+
+                            # Ensure datetimes/strings are strings
+                            if isinstance(cast_val, (pd.Timestamp,)):
+                                example[col] = str(cast_val)
+                            else:
+                                example[col] = cast_val
+                        except Exception:
+                            example[col] = str(val)
+
+                yield f"{chunk_idx}-{row_idx}", example

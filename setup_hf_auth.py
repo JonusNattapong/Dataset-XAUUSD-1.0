@@ -7,6 +7,13 @@ import os
 from huggingface_hub import login, whoami
 from pathlib import Path
 
+# Optionally load a .env file if present so users can store tokens securely
+try:
+    from dotenv import load_dotenv
+    _DOTENV_AVAILABLE = True
+except Exception:
+    _DOTENV_AVAILABLE = False
+
 def setup_hf_auth():
     """Setup Hugging Face authentication"""
 
@@ -35,8 +42,15 @@ def setup_hf_auth():
         print("(You can find it at: https://huggingface.co/settings/tokens)")
         print("Token: ", end="")
 
-        # For security, we'll use environment variable or manual input
-        token = os.getenv('HF_TOKEN')
+        # Load .env if available
+        if _DOTENV_AVAILABLE:
+            # look for a .env in the repo root
+            env_path = Path(__file__).resolve().parent / '.env'
+            if env_path.exists():
+                load_dotenv(env_path)
+
+        # For security, prefer environment variables (check several common names)
+        token = os.getenv('HF_TOKEN') or os.getenv('HF_HUB_TOKEN') or os.getenv('HUGGINGFACE_HUB_TOKEN')
 
         if not token:
             print("\nFor security, please set your token as an environment variable:")
